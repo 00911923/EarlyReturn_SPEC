@@ -1,0 +1,87 @@
+### 測試 1: 成功註冊使用者
+POST http://localhost:8080/api/users/register
+Content-Type: application/json
+
+{
+  "name": "張三",
+  "email": "zhangsan@example.com",
+  "age": 25,
+  "password": "securePassword123"
+}
+
+### 測試 2: Email 格式錯誤
+POST http://localhost:8080/api/users/register
+Content-Type: application/json
+
+{
+  "name": "李四",
+  "email": "invalid-email",
+  "age": 30,
+  "password": "password123"
+}
+
+### 測試 3: 年齡未滿 18 歲
+POST http://localhost:8080/api/users/register
+Content-Type: application/json
+
+{
+  "name": "王五",
+  "email": "wangwu@example.com",
+  "age": 16,
+  "password": "password123"
+}
+
+### 測試 4: 姓名太短
+POST http://localhost:8080/api/users/register
+Content-Type: application/json
+
+{
+  "name": "王",
+  "email": "wang@example.com",
+  "age": 25,
+  "password": "password123"
+}
+
+### 測試 5: 密碼太短
+POST http://localhost:8080/api/users/register
+Content-Type: application/json
+
+{
+  "name": "趙六",
+  "email": "zhaoliu@example.com",
+  "age": 25,
+  "password": "123"
+}
+
+### 測試 6-a: Email 重複 - 第一次註冊（成功）
+POST http://localhost:8080/api/users/register
+Content-Type: application/json
+
+{
+  "name": "孫七",
+  "email": "sunqi@example.com",
+  "age": 25,
+  "password": "password123"
+}
+
+### 測試 6-b: Email 重複 - 第二次註冊（失敗）
+POST http://localhost:8080/api/users/register
+Content-Type: application/json
+
+{
+  "name": "周八",
+  "email": "sunqi@example.com",
+  "age": 28,
+  "password": "password456"
+}
+
+### 測試 7: 多個欄位同時驗證失敗
+POST http://localhost:8080/api/users/register
+Content-Type: application/json
+
+{
+  "name": "吳",
+  "email": "invalid",
+  "age": 15,
+  "password": "123"
+}
