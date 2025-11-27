@@ -1,5 +1,6 @@
 package com.example.validation.service.impl;
 
+import com.example.validation.model.dto.request.UserDataTransfer;
 import com.example.validation.model.dto.request.UserRegistrationRequest;
 import com.example.validation.model.dto.response.UserResponse;
 import com.example.validation.model.entity.User;
@@ -51,6 +52,23 @@ public class UserServiceImpl implements UserService {
 
         // 轉換為回應 DTO
         return toResponse(savedUser);
+    }
+
+    /**
+     * 根據 ID 取得使用者資料
+     *
+     * @param userId 使用者 ID
+     * @return 使用者資料傳輸物件
+     */
+    @Override
+    public UserDataTransfer getUserData(Long userId) {
+        log.info("取得使用者資料，ID: {}", userId);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("找不到使用者，ID: " + userId));
+
+        // 轉換為 UserDataTransfer
+        return UserDataTransfer.fromUser(user);
     }
 
     /**

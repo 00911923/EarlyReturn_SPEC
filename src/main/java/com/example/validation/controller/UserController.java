@@ -1,7 +1,9 @@
 package com.example.validation.controller;
 
+import com.example.validation.model.dto.request.UserDataTransfer;
 import com.example.validation.model.dto.request.UserRegistrationRequest;
 import com.example.validation.model.dto.response.UserResponse;
+import com.example.validation.service.ProfileService;
 import com.example.validation.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+    private final ProfileService profileService;
 
     /**
      * 使用者註冊 API
@@ -38,5 +41,35 @@ public class UserController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);
+    }
+
+    /**
+     * 更新使用者個人資料 API
+     *
+     * 展示情境：
+     * 1. Controller 先從 UserService 取得使用者資料
+     * 2. 將資料包裝成 UserDataTransfer（帶有驗證註解）
+     * 3. 傳入 ProfileService，Service 層會自動驗證資料完整性
+     *
+     * 重點：即使資料來自內部 Service，仍可確保資料的完整性
+     *
+     * @param userId 使用者 ID
+     * @param newPhone 新的電話號碼
+     * @return 更新結果訊息
+     */
+    @PutMapping("/{userId}/profile")
+    public ResponseEntity<String> updateProfile(
+            @PathVariable Long userId,
+            @RequestParam String newPhone) {
+
+        // 步驟 1: 從 UserService 取得使用者資料
+        UserDataTransfer userData = userService.getUserData(userId);
+
+        // 步驟 2: 將資料傳入 ProfileService
+        // ProfileService 的方法參數有 @Valid，會自動驗證 userData
+        // 如果 userData 的任何必要欄位為 null，會拋出 ConstraintViolationException
+        String result = profileService.updateProfile(userData, newPhone);
+
+        return ResponseEntity.ok(result);
     }
 }

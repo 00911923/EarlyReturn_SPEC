@@ -3,7 +3,7 @@ package com.example.validation.validation;
 import com.example.validation.repository.UserRepository;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -12,10 +12,14 @@ import org.springframework.stereotype.Component;
  * 負責檢查 Email 是否已存在於資料庫中
  */
 @Component
-@RequiredArgsConstructor
 public class UniqueEmailValidator implements ConstraintValidator<UniqueEmail, String> {
 
-    private final UserRepository userRepository;
+    private UserRepository userRepository;
+
+    @Autowired
+    public void setUserRepository(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     /**
      * 驗證 Email 是否唯一

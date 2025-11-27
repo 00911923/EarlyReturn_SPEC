@@ -32,6 +32,9 @@ server:
 # 日誌配置
 logging:
   level:
+    root: INFO
     com.example.validation: DEBUG
-    org.springframework.web: INFO
+    org.springframework.web: DEBUG
     org.hibernate.SQL: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"

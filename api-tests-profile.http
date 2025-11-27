@@ -1,0 +1,47 @@
+### ========================================
+### Service 層驗證測試（展示從一個 Service 取資料傳入另一個 Service）
+### ========================================
+
+### 測試準備：先註冊一個測試用戶
+POST http://localhost:8080/api/users/register
+Content-Type: application/json
+
+{
+  "name": "測試用戶",
+  "email": "test-profile@example.com",
+  "age": 25,
+  "password": "password123"
+}
+
+### ========================================
+### 測試 8: 成功更新個人資料
+### ========================================
+### 說明：
+### 1. Controller 呼叫 UserService.getUserData() 取得用戶資料
+### 2. 將資料包裝成 UserDataTransfer（帶有驗證註解）
+### 3. 傳入 ProfileService.updateProfile()
+### 4. ProfileService 的 @Valid 會自動驗證 UserDataTransfer 的所有欄位
+###
+### 這個測試應該成功，因為用戶資料完整
+PUT http://localhost:8080/api/users/1/profile?newPhone=0912345678
+
+### ========================================
+### 測試 9: 使用不存在的用戶 ID
+### ========================================
+### 說明：
+### UserService.getUserData() 找不到用戶時會拋出異常
+PUT http://localhost:8080/api/users/999/profile?newPhone=0912345678
+
+### ========================================
+### 重點觀察
+### ========================================
+### 1. ProfileService 的方法參數加上 @Valid 註解
+### 2. ProfileServiceImpl 類別加上 @Validated 註解
+### 3. 即使資料來自內部 Service，仍會驗證所有必要欄位
+### 4. 驗證失敗時拋出 ConstraintViolationException
+### 5. GlobalExceptionHandler 會統一處理並返回友善的錯誤訊息
+###
+### 這種做法的優點：
+### - 確保跨 Service 傳遞的資料完整性
+### - 聲明式驗證，不需要手動 if 判斷
+### - 統一的錯誤處理機制
