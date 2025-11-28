@@ -1,0 +1,199 @@
+### ========================================
+### Record + @AssertTrue 驗證測試
+### ========================================
+
+### 測試 1：驗證成功 - 普通會員（VIP 0，無折扣）
+POST http://localhost:8080/api/users/vip/validate
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "name": "張三",
+  "age": 25,
+  "vipLevel": 0,
+  "discountRate": 0
+}
+
+### 預期結果：200 OK
+### 回應：驗證通過！使用者: 張三, VIP等級: 0, 折扣率: 0%
+
+
+### ========================================
+### 測試 2：驗證成功 - 銀卡會員（VIP 1，5-10% 折扣）
+POST http://localhost:8080/api/users/vip/validate
+Content-Type: application/json
+
+{
+  "userId": 2,
+  "name": "李四",
+  "age": 28,
+  "vipLevel": 1,
+  "discountRate": 8
+}
+
+### 預期結果：200 OK
+### 回應：驗證通過！使用者: 李四, VIP等級: 1, 折扣率: 8%
+
+
+### ========================================
+### 測試 3：驗證成功 - 金卡會員（VIP 2，10-20% 折扣）
+POST http://localhost:8080/api/users/vip/validate
+Content-Type: application/json
+
+{
+  "userId": 3,
+  "name": "王五",
+  "age": 35,
+  "vipLevel": 2,
+  "discountRate": 15
+}
+
+### 預期結果：200 OK
+
+
+### ========================================
+### 測試 4：驗證成功 - 白金卡會員（VIP 3，20-30% 折扣，年滿 30 歲）
+POST http://localhost:8080/api/users/vip/validate
+Content-Type: application/json
+
+{
+  "userId": 4,
+  "name": "趙六",
+  "age": 40,
+  "vipLevel": 3,
+  "discountRate": 25
+}
+
+### 預期結果：200 OK
+
+
+### ========================================
+### 測試 5：驗證失敗 - VIP 等級與折扣率不符（普通會員有折扣）
+POST http://localhost:8080/api/users/vip/validate
+Content-Type: application/json
+
+{
+  "userId": 5,
+  "name": "孫七",
+  "age": 25,
+  "vipLevel": 0,
+  "discountRate": 5
+}
+
+### 預期結果：400 Bad Request
+### 錯誤訊息：VIP 等級與折扣率不符合規則
+
+
+### ========================================
+### 測試 6：驗證失敗 - 銀卡折扣率超出範圍（應為 5-10%）
+POST http://localhost:8080/api/users/vip/validate
+Content-Type: application/json
+
+{
+  "userId": 6,
+  "name": "周八",
+  "age": 30,
+  "vipLevel": 1,
+  "discountRate": 15
+}
+
+### 預期結果：400 Bad Request
+### 錯誤訊息：VIP 等級與折扣率不符合規則
+
+
+### ========================================
+### 測試 7：驗證失敗 - 白金卡年齡不足（需年滿 30 歲）
+POST http://localhost:8080/api/users/vip/validate
+Content-Type: application/json
+
+{
+  "userId": 7,
+  "name": "吳九",
+  "age": 25,
+  "vipLevel": 3,
+  "discountRate": 25
+}
+
+### 預期結果：400 Bad Request
+### 錯誤訊息：白金卡僅限 30 歲以上會員申請
+
+
+### ========================================
+### 測試 8：驗證失敗 - 年齡未滿 18 歲（@Min 驗證）
+POST http://localhost:8080/api/users/vip/validate
+Content-Type: application/json
+
+{
+  "userId": 8,
+  "name": "鄭十",
+  "age": 16,
+  "vipLevel": 0,
+  "discountRate": 0
+}
+
+### 預期結果：400 Bad Request
+### 錯誤訊息：年齡必須大於等於 18 歲
+
+
+### ========================================
+### 測試 9：驗證失敗 - 姓名為空（@NotBlank 驗證）
+POST http://localhost:8080/api/users/vip/validate
+Content-Type: application/json
+
+{
+  "userId": 9,
+  "name": "",
+  "age": 25,
+  "vipLevel": 0,
+  "discountRate": 0
+}
+
+### 預期結果：400 Bad Request
+### 錯誤訊息：姓名不可為空
+
+
+### ========================================
+### 測試 10：驗證失敗 - 折扣率超出範圍（@AssertTrue: isValidDiscountRange）
+POST http://localhost:8080/api/users/vip/validate
+Content-Type: application/json
+
+{
+  "userId": 10,
+  "name": "測試",
+  "age": 25,
+  "vipLevel": 1,
+  "discountRate": 150
+}
+
+### 預期結果：400 Bad Request
+### 錯誤訊息：折扣率必須在 0-100 之間
+
+
+### ========================================
+### 測試 11：驗證失敗 - 多個驗證同時失敗
+POST http://localhost:8080/api/users/vip/validate
+Content-Type: application/json
+
+{
+  "userId": 11,
+  "name": "測",
+  "age": 16,
+  "vipLevel": 3,
+  "discountRate": 25
+}
+
+### 預期結果：400 Bad Request
+### 錯誤訊息包含多個錯誤：
+### - name: 姓名長度必須在 2-50 字元之間
+### - age: 年齡必須大於等於 18 歲
+### - 白金卡僅限 30 歲以上會員申請
+
+
+### ========================================
+### 重點觀察
+### ========================================
+### 1. Record 完全支援 @AssertTrue 驗證
+### 2. 驗證順序：先執行基本驗證（@NotNull, @Min），再執行 @AssertTrue
+### 3. @AssertTrue 可以進行跨欄位的複雜業務邏輯驗證
+### 4. Record 的語法比 Class 更簡潔（不需要 Lombok）
+### 5. Record 是不可變的（immutable），更安全

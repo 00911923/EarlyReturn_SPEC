@@ -2,6 +2,7 @@ package com.example.validation.controller;
 
 import com.example.validation.model.dto.request.UserDataTransfer;
 import com.example.validation.model.dto.request.UserRegistrationRequest;
+import com.example.validation.model.dto.request.UserVipRequest;
 import com.example.validation.model.dto.response.UserResponse;
 import com.example.validation.service.ProfileService;
 import com.example.validation.service.UserService;
@@ -71,5 +72,29 @@ public class UserController {
         String result = profileService.updateProfile(userData, newPhone);
 
         return ResponseEntity.ok(result);
+    }
+
+    /**
+     * 測試 Record 配合 @AssertTrue 的 API
+     *
+     * 展示：Record 如何使用 @AssertTrue 進行複雜驗證
+     *
+     * @param request Record 格式的請求 DTO（包含 @AssertTrue 驗證）
+     * @return 驗證成功訊息
+     */
+    @PostMapping("/vip/validate")
+    public ResponseEntity<String> validateVip(@Valid @RequestBody UserVipRequest request) {
+        // @Valid 會自動觸發 @AssertTrue 驗證
+        // 驗證規則：
+        // 1. isValidVipDiscount() - VIP 等級與折扣率必須對應
+        // 2. isValidPlatinumAge() - 白金卡必須年滿 30 歲
+        // 3. isValidDiscountRange() - 折扣率必須在 0-100 之間
+
+        return ResponseEntity.ok(
+            String.format("驗證通過！使用者: %s, VIP等級: %d, 折扣率: %d%%",
+                request.name(),
+                request.vipLevel(),
+                request.discountRate())
+        );
     }
 }
